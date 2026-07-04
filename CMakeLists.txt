@@ -19,4 +19,5 @@ add_executable(drama-pi
     src/UptimeMonitor.cpp
     src/EventDetector.cpp
     src/DramaLibrary.cpp
+    src/ReminderLibrary.cpp
 )

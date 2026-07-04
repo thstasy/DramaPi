@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <chrono>
+#include <thread>
 
 #include "CpuMonitor.h"
 #include "DiskMonitor.h"
@@ -10,6 +12,7 @@
 #include "TemperatureMonitor.h"
 #include "UptimeMonitor.h"
 #include "Personality.h"
+#include "ReminderLibrary.h"
 
 Personality parsePersonality(const std::string& name){
     if (name == "dramatic")
@@ -55,10 +58,6 @@ std::string personalityName(Personality personality)
 
 int main(int argc, char* argv[])
 {
-    std::cout << "============================\n";
-    std::cout << "🎭 Drama Pi\n";
-    std::cout << "============================\n";
-
     TemperatureMonitor temperatureMonitor;
     CpuMonitor cpuMonitor;
     MemoryMonitor memoryMonitor;
@@ -67,48 +66,64 @@ int main(int argc, char* argv[])
     EventDetector eventDetector;
     DramaEngine dramaEngine;
     Personality personality = Personality::Dramatic;
+    ReminderLibrary reminderLibrary;
 
-    if(argc>1)
+    if (argc > 1)
     {
-        personality=parsePersonality(argv[1]);
+        personality = parsePersonality(argv[1]);
     }
 
-    SystemStatus status;
-    status.cpuTemperature = temperatureMonitor.getTemperature();
-    status.cpuUsage = cpuMonitor.getCpuUsage();
-    status.memoryUsage = memoryMonitor.getMemoryUsage();
-    status.diskUsage = diskMonitor.getDiskUsage();
-    status.uptimeHours = uptimeMonitor.getUptimeHours();
+    while (true)
+    {
+        SystemStatus status;
+        status.cpuTemperature = temperatureMonitor.getTemperature();
+        status.cpuUsage = cpuMonitor.getCpuUsage();
+        status.memoryUsage = memoryMonitor.getMemoryUsage();
+        status.diskUsage = diskMonitor.getDiskUsage();
+        status.uptimeHours = uptimeMonitor.getUptimeHours();
 
-    DramaEvent event = eventDetector.detect(status);
+        DramaEvent event = eventDetector.detect(status);
 
-    std::cout << "Personality: "
-          << personalityName(personality)
-          << "\n";
-          
-    std::cout << "CPU Temp: "
-              << status.cpuTemperature
-              << " °C\n";
+        std::cout << "============================\n";
+        std::cout << "🎭 Drama Pi\n";
+        std::cout << "============================\n";
 
-    std::cout << "CPU Usage: "
-              << status.cpuUsage
-              << " %\n";
+        std::cout << "Personality: "
+                  << personalityName(personality)
+                  << "\n";
 
-    std::cout << "Disk Usage: "
-              << status.diskUsage
-              << " %\n";
+        std::cout << "CPU Temp: "
+                  << status.cpuTemperature
+                  << " °C\n";
 
-    std::cout << "Memory Usage: "
-              << status.memoryUsage
-              << " %\n";
+        std::cout << "CPU Usage: "
+                  << status.cpuUsage
+                  << " %\n";
 
-    std::cout << "Uptime: "
-              << status.uptimeHours
-              << " hours\n";
+        std::cout << "Disk Usage: "
+                  << status.diskUsage
+                  << " %\n";
 
-    std::cout << "Drama Pi: "
-            << dramaEngine.comment(event, personality)
-            << "\n";              
+        std::cout << "Memory Usage: "
+                  << status.memoryUsage
+                  << " %\n";
+
+        std::cout << "Uptime: "
+                  << status.uptimeHours
+                  << " hours\n";
+
+        std::cout << "Drama Pi: "
+                  << dramaEngine.comment(event, personality)
+                  << "\n";
+
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+
+        std::cout << "⏰ Reminder: "
+                << reminderLibrary.reminder(personality)
+                << "\n\n"
+                << std::flush;
+
+    }
 
     return 0;
 }
