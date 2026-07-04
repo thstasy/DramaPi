@@ -6,6 +6,7 @@
 #include "SystemStatus.h"
 #include "TemperatureMonitor.h"
 #include "MemoryMonitor.h"
+#include "DiskMonitor.h"
 
 int main()
 {
@@ -18,11 +19,13 @@ int main()
     MoodEngine moodEngine;
     DramaEngine dramaEngine;
     MemoryMonitor memoryMonitor;
+    DiskMonitor diskMonitor;
 
     SystemStatus status;
     status.cpuTemperature = temperatureMonitor.getTemperature();
     status.cpuUsage = cpuMonitor.getCpuUsage();
     status.memoryUsage = memoryMonitor.getMemoryUsage();
+    status.diskUsage = diskMonitor.getDiskUsage();
 
     Mood mood = moodEngine.evaluate(status);
 
@@ -32,6 +35,10 @@ int main()
 
     std::cout << "CPU Usage: "
               << status.cpuUsage
+              << " %\n";
+
+    std::cout << "Disk Usage: "
+              << status.diskUsage
               << " %\n";
 
     std::cout << "Memory Usage: "

@@ -5,4 +5,5 @@ struct SystemStatus
     double cpuTemperature;
     double cpuUsage;
     double memoryUsage;
+    double diskUsage;
 };

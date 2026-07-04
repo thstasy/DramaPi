@@ -18,5 +18,9 @@ Mood MoodEngine::evaluate(const SystemStatus& status) const
         return Mood::HeartBroken;
     }
 
+    if (status.diskUsage > 90.0) {
+        return Mood::ExistentialCrisis;
+    }
+
     return Mood::Calm;
 }
