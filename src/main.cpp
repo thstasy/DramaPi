@@ -1,12 +1,8 @@
-#include<array>
-#include<cstdio>
-#include<cstdlib>
-#include<iostream>
-#include<memory>
-#include<string>
-#include "CommandRunner.h"
-#include "TemperatureMonitor.h"
+#include <iostream>
+
 #include "DramaEngine.h"
+#include "SystemStatus.h"
+#include "TemperatureMonitor.h"
 
 int main()
 {
@@ -17,11 +13,15 @@ int main()
     TemperatureMonitor temperatureMonitor;
     DramaEngine dramaEngine;
 
-    double temp = temperatureMonitor.getTemperature();
+    SystemStatus status;
+    status.cpuTemperature = temperatureMonitor.getTemperature();
 
-    std::cout << "CPU Temp: " << temp << " °C\n";
+    std::cout << "CPU Temp: "
+              << status.cpuTemperature
+              << " °C\n";
+
     std::cout << "Drama Pi: "
-              << dramaEngine.commentOnTemperature(temp)
+              << dramaEngine.comment(status)
               << "\n";
 
     return 0;

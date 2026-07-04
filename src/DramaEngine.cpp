@@ -1,7 +1,9 @@
 #include "DramaEngine.h"
 
-std::string DramaEngine::commentOnTemperature(double temp) const
+std::string DramaEngine::comment(const SystemStatus& status) const
 {
+    double temp = status.cpuTemperature;
+
     if (temp < 50.0) {
         return "我只是微溫，不要像 THE FIZZ 一樣小題大作。";
     } else if (temp < 65.0) {

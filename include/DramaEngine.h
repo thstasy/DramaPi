@@ -1,9 +1,10 @@
 #pragma once
-#include <string>
 
+#include <string>
+#include "SystemStatus.h"
 
 class DramaEngine
 {
 public:
-    std::string commentOnTemperature(double temperature) const;
+    std::string comment(const SystemStatus& status) const;
 };
