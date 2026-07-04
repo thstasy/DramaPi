@@ -16,4 +16,7 @@ add_executable(drama-pi
     src/MoodEngine.cpp
     src/MemoryMonitor.cpp
     src/DiskMonitor.cpp
+    src/UptimeMonitor.cpp
+    src/EventDetector.cpp
+    src/DramaLibrary.cpp
 )

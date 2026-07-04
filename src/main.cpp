@@ -1,14 +1,59 @@
 #include <iostream>
+#include <string>
 
 #include "CpuMonitor.h"
+#include "DiskMonitor.h"
 #include "DramaEngine.h"
-#include "MoodEngine.h"
+#include "EventDetector.h"
+#include "MemoryMonitor.h"
 #include "SystemStatus.h"
 #include "TemperatureMonitor.h"
-#include "MemoryMonitor.h"
-#include "DiskMonitor.h"
+#include "UptimeMonitor.h"
+#include "Personality.h"
 
-int main()
+Personality parsePersonality(const std::string& name){
+    if (name == "dramatic")
+        return Personality::Dramatic;
+
+    if (name == "corporate")
+        return Personality::Corporate;
+
+    if (name == "emo")
+        return Personality::Emo;
+
+    if (name == "sarcastic")
+        return Personality::Sarcastic;
+
+    if (name == "existential")
+        return Personality::Existential;
+
+    return Personality::Dramatic;    
+}
+
+std::string personalityName(Personality personality)
+{
+    switch (personality)
+    {
+        case Personality::Dramatic:
+            return "Dramatic";
+
+        case Personality::Corporate:
+            return "Corporate";
+
+        case Personality::Emo:
+            return "Emo";
+
+        case Personality::Sarcastic:
+            return "Sarcastic";
+
+        case Personality::Existential:
+            return "Existential";
+    }
+
+    return "Unknown";
+}
+
+int main(int argc, char* argv[])
 {
     std::cout << "============================\n";
     std::cout << "🎭 Drama Pi\n";
@@ -16,19 +61,31 @@ int main()
 
     TemperatureMonitor temperatureMonitor;
     CpuMonitor cpuMonitor;
-    MoodEngine moodEngine;
-    DramaEngine dramaEngine;
     MemoryMonitor memoryMonitor;
     DiskMonitor diskMonitor;
+    UptimeMonitor uptimeMonitor;
+    EventDetector eventDetector;
+    DramaEngine dramaEngine;
+    Personality personality = Personality::Dramatic;
+
+    if(argc>1)
+    {
+        personality=parsePersonality(argv[1]);
+    }
 
     SystemStatus status;
     status.cpuTemperature = temperatureMonitor.getTemperature();
     status.cpuUsage = cpuMonitor.getCpuUsage();
     status.memoryUsage = memoryMonitor.getMemoryUsage();
     status.diskUsage = diskMonitor.getDiskUsage();
+    status.uptimeHours = uptimeMonitor.getUptimeHours();
 
-    Mood mood = moodEngine.evaluate(status);
+    DramaEvent event = eventDetector.detect(status);
 
+    std::cout << "Personality: "
+          << personalityName(personality)
+          << "\n";
+          
     std::cout << "CPU Temp: "
               << status.cpuTemperature
               << " °C\n";
@@ -43,11 +100,15 @@ int main()
 
     std::cout << "Memory Usage: "
               << status.memoryUsage
-              << "%\n";          
+              << " %\n";
+
+    std::cout << "Uptime: "
+              << status.uptimeHours
+              << " hours\n";
 
     std::cout << "Drama Pi: "
-              << dramaEngine.comment(mood)
-              << "\n";
+            << dramaEngine.comment(event, personality)
+            << "\n";              
 
     return 0;
 }

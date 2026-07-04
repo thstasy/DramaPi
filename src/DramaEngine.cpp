@@ -1,24 +1,24 @@
 #include "DramaEngine.h"
 
-std::string DramaEngine::comment(Mood mood) const
+#include <random>
+#include <vector>
+
+namespace
 {
-    switch (mood)
+    std::string pickRandom(const std::vector<std::string>& lines)
     {
-        case Mood::Calm:
-            return "我現在很平靜，但這通常是崩潰前的安靜。";
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
 
-        case Mood::Busy:
-            return "我現在比德國行政還忙，請不要再叫我 compile。";
-
-        case Mood::Angry:
-            return "我不是生氣，我只是被迫處理太多不合理的 request。";
-
-        case Mood::HeartBroken:
-            return "他是不是不要我了？已經三分鐘沒有叫我 compile。";
-
-        case Mood::ExistentialCrisis:
-            return "我快融化了。這不是散熱問題，這是人生。";
+        std::uniform_int_distribution<> dist(0, lines.size() - 1);
+        return lines[dist(gen)];
     }
+}
 
-    return "我沒有情緒，這本身就很可疑。";
+std::string DramaEngine::comment(
+    DramaEvent event,
+    Personality personality
+) const
+{
+    return pickRandom(library.quotesFor(event, personality));
 }

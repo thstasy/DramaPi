@@ -1,19 +1,16 @@
 #pragma once
 
 #include "DramaEvent.h"
-#include "DramaLibrary.h"
 #include "Personality.h"
 
 #include <string>
+#include <vector>
 
-class DramaEngine
+class DramaLibrary
 {
 public:
-    std::string comment(
+    std::vector<std::string> quotesFor(
         DramaEvent event,
         Personality personality
     ) const;
-
-private:
-    DramaLibrary library;
 };

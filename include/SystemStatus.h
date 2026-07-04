@@ -6,4 +6,5 @@ struct SystemStatus
     double cpuUsage;
     double memoryUsage;
     double diskUsage;
+    double uptimeHours;
 };
