@@ -1,10 +1,10 @@
 #pragma once
 
 #include <string>
-#include "SystemStatus.h"
+#include "Mood.h"
 
 class DramaEngine
 {
 public:
-    std::string comment(const SystemStatus& status) const;
+    std::string comment(Mood mood) const;
 };

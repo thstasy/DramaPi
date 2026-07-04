@@ -12,4 +12,6 @@ add_executable(drama-pi
     src/CommandRunner.cpp
     src/TemperatureMonitor.cpp
     src/DramaEngine.cpp
+    src/CpuMonitor.cpp
+    src/MoodEngine.cpp
 )
