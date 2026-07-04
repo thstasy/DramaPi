@@ -14,4 +14,5 @@ add_executable(drama-pi
     src/DramaEngine.cpp
     src/CpuMonitor.cpp
     src/MoodEngine.cpp
+    src/MemoryMonitor.cpp
 )

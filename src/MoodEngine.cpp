@@ -6,6 +6,10 @@ Mood MoodEngine::evaluate(const SystemStatus& status) const
         return Mood::ExistentialCrisis;
     }
 
+    if (status.memoryUsage > 85.0) {
+        return Mood::Angry;
+    }
+
     if (status.cpuUsage > 80.0) {
         return Mood::Busy;
     }
