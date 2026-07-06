@@ -21,3 +21,12 @@ add_executable(drama-pi
     src/DramaLibrary.cpp
     src/ReminderLibrary.cpp
 )
+
+add_executable(led-blink
+    src/led_blink.cpp
+)
+
+target_link_libraries(led-blink
+    gpiodcxx
+    gpiod
+)
