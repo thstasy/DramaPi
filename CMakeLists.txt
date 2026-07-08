@@ -33,4 +33,6 @@ target_link_libraries(led-blink
 
 add_executable(mood-randomizer
     src/mood_randomizer.cpp
+    src/Led.cpp
+    src/LCD1602.cpp
 )
