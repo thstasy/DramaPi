@@ -30,3 +30,7 @@ target_link_libraries(led-blink
     gpiodcxx
     gpiod
 )
+
+add_executable(mood-randomizer
+    src/mood_randomizer.cpp
+)
