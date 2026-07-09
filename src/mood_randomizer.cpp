@@ -1,5 +1,6 @@
 #include "Led.h"
 #include "LCD1602.h"
+#include "Servo.h"
 
 #include <chrono>
 #include <cstdlib>
@@ -13,19 +14,11 @@ using namespace std::chrono_literals;
 
 Led red(17);
 Led green(27);
-
-void run(const std::string& cmd) {
-    std::system(cmd.c_str());
-}
-
-void servo(int duty) {
-    run("echo " + std::to_string(duty) +
-        " | sudo tee /sys/class/pwm/pwmchip0/pwm2/duty_cycle > /dev/null");
-}
-
 LCD1602 lcdDisplay(0x27);
+Servo servo;
 
-void lcd(const std::string& line1, const std::string& line2) {
+void lcd(const std::string& line1, const std::string& line2)
+{
     std::cout << "\n[LCD]\n"
               << line1 << "\n"
               << line2 << "\n";
@@ -33,25 +26,30 @@ void lcd(const std::string& line1, const std::string& line2) {
     lcdDisplay.print(line1, line2);
 }
 
-void transition() {
+void transition()
+{
     red.off();
     green.off();
-    servo(1500000);
+    servo.lookCenter();
+
     lcd("Loading drama", "Please wait...");
     std::this_thread::sleep_for(1s);
 }
 
-void judging() {
+void judging()
+{
     red.on();
     green.off();
-    servo(2000000);
+    servo.lookRight();
+
     lcd("Human input:", "Disappointing.");
 }
 
-void germanMode() {
+void germanMode()
+{
     red.on();
     green.off();
-    servo(1000000);
+    servo.lookLeft();
 
     static std::vector<std::pair<std::string, std::string>> lines = {
         {"Form missing", "Which? Secret."},
@@ -64,45 +62,52 @@ void germanMode() {
 
     static std::mt19937 rng(std::random_device{}());
     auto& msg = lines[rng() % lines.size()];
+
     lcd(msg.first, msg.second);
 }
 
-void bufferOverflow() {
+void bufferOverflow()
+{
     for (int i = 0; i < 4; ++i) {
         red.on();
         green.off();
-        servo(1000000);
+        servo.lookLeft();
         std::this_thread::sleep_for(300ms);
 
         red.off();
         green.on();
-        servo(2000000);
+        servo.lookRight();
         std::this_thread::sleep_for(300ms);
     }
 
     lcd("Too much", "drama.");
 }
 
-void existential() {
+void existential()
+{
     red.on();
     green.off();
-    servo(1500000);
+    servo.lookCenter();
+
     lcd("I am just", "electrons.");
 }
 
-void undefinedBehavior() {
+void undefinedBehavior()
+{
     red.on();
     green.on();
-    servo(1000000);
+    servo.lookLeft();
     std::this_thread::sleep_for(500ms);
 
-    servo(2000000);
+    servo.lookRight();
+
     lcd("Undefined", "Behavior");
 }
 
-int main() {
-
-    lcdDisplay.init();  
+int main()
+{
+    lcdDisplay.init();
+    servo.init();
 
     std::vector<void(*)()> scenes = {
         judging,

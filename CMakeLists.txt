@@ -35,4 +35,5 @@ add_executable(mood-randomizer
     src/mood_randomizer.cpp
     src/Led.cpp
     src/LCD1602.cpp
+    src/Servo.cpp
 )
