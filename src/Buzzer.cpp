@@ -1,34 +1,10 @@
-// #include "Led.h"
+#include "Buzzer.h"
 
-// #include <cstdlib>
-
-// Led::Led(int gpio)
-//     : gpio_(gpio)
-// {
-// }
-
-// void Led::run(const std::string& cmd)
-// {
-//     std::system(cmd.c_str());
-// }
-
-// void Led::on()
-// {
-//     run("sudo pinctrl set "
-//         + std::to_string(gpio_)
-//         + " op dh");
-// }
-
-// void Led::off()
-// {
-//     run("sudo pinctrl set "
-//         + std::to_string(gpio_)
-//         + " op dl");
-// }
-#include "Led.h"
+#include <thread>
+#include <chrono>
 
 
-Led::Led(int gpio)
+Buzzer::Buzzer(int gpio)
 :
 gpio_(gpio),
 chip_("/dev/gpiochip0")
@@ -45,7 +21,7 @@ chip_("/dev/gpiochip0")
     request_.emplace(
         chip_
         .prepare_request()
-        .set_consumer("DramaPi-LED")
+        .set_consumer("DramaPi-Buzzer")
         .add_line_settings(
             gpio_,
             settings
@@ -60,14 +36,14 @@ chip_("/dev/gpiochip0")
 
 
 
-Led::~Led()
+Buzzer::~Buzzer()
 {
     off();
 }
 
 
 
-void Led::on()
+void Buzzer::on()
 {
 
     request_->set_value(
@@ -79,12 +55,29 @@ void Led::on()
 
 
 
-void Led::off()
+void Buzzer::off()
 {
 
     request_->set_value(
         gpio_,
         gpiod::line::value::INACTIVE
     );
+
+}
+
+
+
+void Buzzer::beep(int milliseconds)
+{
+
+    on();
+
+
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(milliseconds)
+    );
+
+
+    off();
 
 }

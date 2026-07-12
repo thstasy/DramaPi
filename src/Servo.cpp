@@ -29,6 +29,8 @@ void Servo::writeFile(const std::string& path, int value)
 
 void Servo::init()
 {
+    system("pinctrl set 18 a3");
+    
     if (!exists(PwmPath)) {
         writeFile(std::string(PwmChipPath) + "/export", Channel);
         std::this_thread::sleep_for(100ms);
