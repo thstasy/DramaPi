@@ -18,6 +18,8 @@ public:
 
     void off();
 
+    void alarm(int milliseconds, int volume);
+
     void beep(int milliseconds);
 
 

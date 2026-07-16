@@ -18,12 +18,13 @@
 #include "LCD1602.h"
 #include "Led.h"
 #include "Servo.h"
+#include "PassiveBuzzer.h"
 
 #include "HumanDetector.h"
 #include "HumanState.h"
 #include "HumanInteraction.h"
 #include "Buzzer.h"
-
+#include "StartupMelody.h"
 
 Personality parsePersonality(const std::string& name)
 {
@@ -80,7 +81,6 @@ int main(int argc, char* argv[])
     DiskMonitor diskMonitor;
     UptimeMonitor uptimeMonitor;
 
-
     EventDetector eventDetector;
     HumanDetector humanDetector;
     DramaEngine dramaEngine;
@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     ReminderLibrary reminderLibrary;
 
     HumanInteraction humanInteraction;
+
 
     DistanceSensor distanceSensor(
         7,   // TRIG GPIO
@@ -102,15 +103,43 @@ int main(int argc, char* argv[])
     Led redLed(27);
     Led greenLed(17);
 
-    Buzzer buzzer(22);
 
+    // Active buzzer: GPIO22 / Physical Pin 15
+    Buzzer buzzer(22);
+    buzzer.off();
+
+
+    // Passive buzzer: GPIO19 / Physical Pin 35
+    // lgpio version initializes inside the constructor.
+    // Do NOT call musicBuzzer.init().
+    PassiveBuzzer musicBuzzer(19);
+
+
+    // Servo: GPIO18 / Physical Pin 12
     Servo servo;
     servo.init();
 
 
+/*
+ * ============================
+ * Startup sequence
+ * ============================
+ */
+
+    lcd.print(
+        "Drama Pi",
+        "Bonjour..."
+    );
+
+    musicBuzzer.playMelody(
+        StartupMelody,
+        120,
+        2
+    );
 
     Personality personality =
         Personality::Dramatic;
+
 
 
     if(argc > 1)
@@ -126,6 +155,8 @@ int main(int argc, char* argv[])
 
     auto closeStart =
         std::chrono::steady_clock::time_point{};
+
+    int emergencyMessage = 0;     
 
     while(true)
     {
@@ -251,71 +282,6 @@ int main(int argc, char* argv[])
             << "\n";
 
 
-        /*
-         * ============================
-         * Physical reaction
-         * ============================
-         */
-
-/*
-        switch(event)
-        {
-
-            case DramaEvent::HumanTooClose:
-
-                lcd.print(
-                    "PERSONAL SPACE",
-                    "NO HARASSMENT"
-                );
-
-
-                redLed.on();
-                // rgbLed.red();
-                buzzer.off();
-                servo.lookLeft();
-
-                break;
-
-
-
-            case DramaEvent::HumanDetected:
-
-
-                lcd.print(
-                    "Human detected",
-                    "I see you..."
-                );
-
-
-                redLed.on();
-                // rgbLed.yellow();
-                buzzer.off();
-                servo.lookRight();
-
-                break;
-
-
-
-            default:
-
-
-                lcd.print(
-                    "Drama Pi",
-                    "Watching..."
-                );
-
-
-                redLed.off();
-                greenLed.on();
-                // rgbLed.green();
-                buzzer.off();
-                servo.lookCenter();
-
-                break;
-        }
-
-*/
-
 /*
  * ============================
  * Physical reaction
@@ -341,7 +307,7 @@ int main(int argc, char* argv[])
 
             buzzer.off();
 
-            servo.lookCenter();
+            servo.home();
 
             closeStart =
                 std::chrono::steady_clock::time_point{};
@@ -362,8 +328,7 @@ int main(int argc, char* argv[])
 
             buzzer.off();
 
-            servo.lookRight();
-
+            servo.home();
             break;
 
 
@@ -381,9 +346,7 @@ int main(int argc, char* argv[])
 
             buzzer.off();
 
-            servo.lookLeft();
-
-
+            servo.startScanning();
             if(closeStart.time_since_epoch().count()==0)
             {
                 closeStart = now;
@@ -405,9 +368,7 @@ int main(int argc, char* argv[])
             redLed.on();
 
 
-            servo.lookLeft();
-
-
+            servo.startScanning();
             if(closeStart.time_since_epoch().count()==0)
             {
                 closeStart = now;
@@ -431,15 +392,16 @@ int main(int argc, char* argv[])
                         "HR notified"
                     );
 
-
-                    buzzer.on();
-
+                    buzzer.alarm(
+                        3000,
+                        20
+                    );
 
                     std::cout
                     << "\n🚨 EMERGENCY\n"
-                    << "HUMAN HAS IGNORED ALL SOCIAL CUES.\n"
-                    << "HR notified.\n"
-                    << "HR did not care.\n\n";
+                  //  << "HUMAN HAS IGNORED ALL SOCIAL CUES.\n"
+                  //  << "HR notified.\n"
+                    << "HR not care.\n\n";
 
 
                 }
@@ -468,9 +430,7 @@ int main(int argc, char* argv[])
             greenLed.off();
 
 
-            servo.lookLeft();
-
-
+            servo.startScanning();
             buzzer.off();
 
 
@@ -481,10 +441,41 @@ int main(int argc, char* argv[])
         case HumanState::Emergency:
 
 
-            lcd.print(
-                "EMERGENCY",
-                "HR notified"
-            );
+            // lcd.print(
+            //     "EMERGENCY",
+            //     "HR notified"
+            // );
+            switch(emergencyMessage)
+            {
+                case 0:
+                    lcd.print(
+                        "EMERGENCY",
+                        "HR notified"
+                    );
+                    break;
+
+                case 1:
+                    lcd.print(
+                        "SOCIAL CUES",
+                        "IGNORED"
+                    );
+                    break;
+
+                case 2:
+                    lcd.print(
+                        "HR NOTIFIED",
+                        "HR DOES NOTHING"
+                    );
+                    break;
+            }
+
+            emergencyMessage++;
+
+            if(emergencyMessage >= 3)
+            {
+                emergencyMessage = 0;
+            }
+
 
 
             redLed.on();
@@ -492,31 +483,20 @@ int main(int argc, char* argv[])
 
 
             buzzer.on();
+            servo.startScanning();
 
-
-            servo.lookLeft();
 
 
             break;
 
-        }
+            }
+            servo.update();
 
         /*
          * ============================
          * Independent reminder
          * ============================
          */
-
-
-        // auto now =
-        //     std::chrono::steady_clock::now();
-
-
-        // auto minutes =
-        //     std::chrono::duration_cast<
-        //         std::chrono::minutes
-        //     >(now - lastReminder)
-        //     .count();
 
         auto minutes =
             std::chrono::duration_cast<

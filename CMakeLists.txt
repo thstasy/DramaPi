@@ -37,6 +37,7 @@ add_executable(drama-pi
     src/LCD1602.cpp
     src/Led.cpp
     src/Servo.cpp
+    src/PassiveBuzzer.cpp
 
     src/HumanDetector.cpp
     src/HumanInteraction.cpp
@@ -48,6 +49,7 @@ add_executable(drama-pi
 target_link_libraries(drama-pi
     gpiodcxx
     gpiod
+    lgpio
 )
 
 
@@ -105,4 +107,22 @@ add_executable(ultrasonic-test
 target_link_libraries(ultrasonic-test
     gpiodcxx
     gpiod
+)
+
+add_executable(passive-buzzer-test
+    src/passive_buzzer_test.cpp
+    src/PassiveBuzzer.cpp
+)
+target_link_libraries(passive-buzzer-test
+    gpiodcxx
+    gpiod
+    lgpio
+)
+
+add_executable(lgpio-buzzer-test
+    src/lgpio_buzzer_test.cpp
+)
+
+target_link_libraries(lgpio-buzzer-test
+    lgpio
 )

@@ -65,7 +65,55 @@ void Buzzer::off()
 
 }
 
+void Buzzer::alarm(
+    int milliseconds,
+    int volume
+)
+{
 
+    auto start =
+        std::chrono::steady_clock::now();
+
+
+    while(
+        std::chrono::duration_cast<
+            std::chrono::milliseconds
+        >
+        (
+            std::chrono::steady_clock::now()
+            -
+            start
+        )
+        .count()
+        <
+        milliseconds
+    )
+    {
+
+        request_->set_value(
+            gpio_,
+            gpiod::line::value::ACTIVE
+        );
+
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(volume)
+        );
+
+
+        request_->set_value(
+            gpio_,
+            gpiod::line::value::INACTIVE
+        );
+
+
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(100-volume)
+        );
+
+    }
+
+}
 
 void Buzzer::beep(int milliseconds)
 {
