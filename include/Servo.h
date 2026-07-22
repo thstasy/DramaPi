@@ -1,59 +1,271 @@
+// #pragma once
+
+// #include <atomic>
+// #include <thread>
+
+
+// class Servo
+// {
+// public:
+//     explicit Servo(
+//         int gpio = 18
+//     );
+
+//     ~Servo();
+
+
+//     Servo(
+//         const Servo&
+//     ) = delete;
+
+//     Servo& operator=(
+//         const Servo&
+//     ) = delete;
+
+
+//     /*
+//      * 開啟 GPIO 並啟動 Servo 控制執行緒。
+//      * 初始化完成後，Servo 會回到中央。
+//      */
+//     void init();
+
+
+//     /*
+//      * 切換到待機模式並平滑回到中央。
+//      */
+//     void home();
+
+
+//     /*
+//      * 切換到一般左右掃描模式。
+//      */
+//     void startScanning();
+
+
+//     /*
+//      * 停止一般掃描並回到中央。
+//      */
+//     void stopScanning();
+
+
+//     /*
+//      * 切換到緊急快速甩頭模式。
+//      * 這個函式不阻塞 main loop。
+//      */
+//     void startEmergencyShake();
+
+
+//     /*
+//      * Servo 控制執行緒是否正在運作。
+//      */
+//     [[nodiscard]]
+//     bool isRunning() const;
+
+
+// private:
+//     enum class Mode
+//     {
+//         Home,
+//         Scanning,
+//         Emergency
+//     };
+
+
+//     enum class ScanPhase
+//     {
+//         Left,
+//         MiddleAfterLeft,
+//         Right,
+//         MiddleAfterRight
+//     };
+
+
+//     void controlLoop();
+
+
+//     void updateHome();
+
+
+//     void updateScanning();
+
+
+//     void updateEmergency();
+
+
+//     void setAngle(
+//         int angle
+//     );
+
+
+//     [[nodiscard]]
+//     int angleToPulseWidth(
+//         int angle
+//     ) const;
+
+
+//     [[nodiscard]]
+//     int randomAngle(
+//         int minimum,
+//         int maximum
+//     );
+
+
+//     void chooseTargetForCurrentPhase();
+
+
+//     void advanceScanPhase();
+
+
+//     void moveTowardTarget(
+//         int stepDegrees
+//     );
+
+
+// private:
+//     int gpio_;
+
+//     int chipHandle_;
+
+
+//     int currentAngle_;
+
+//     int targetAngle_;
+
+
+//     ScanPhase scanPhase_;
+
+
+//     std::atomic<Mode> mode_;
+
+//     std::atomic<bool> running_;
+
+//     std::thread controlThread_;
+
+
+//     /*
+//      * 程式邏輯中心。
+//      * 經校正後對應 1800 µs。
+//      */
+//     static constexpr int HomeAngle = 90;
+
+
+//     /*
+//      * Servo 實際校正結果：
+//      *
+//      * 1600 µs → 右側
+//      * 1800 µs → 中央
+//      * 2000 µs → 左側
+//      */
+//     static constexpr int MinimumPulseWidthUs = 1600;
+
+//     static constexpr int CenterPulseWidthUs = 1800;
+
+//     static constexpr int MaximumPulseWidthUs = 2000;
+
+
+//     static constexpr int ServoFrequencyHz = 50;
+
+
+//     /*
+//      * 控制執行緒固定每 15 ms 更新一次。
+//      */
+//     static constexpr int ControlIntervalMs = 15;
+
+
+//     /*
+//      * 一般模式移動較平滑。
+//      */
+//     static constexpr int NormalStepDegrees = 3;
+
+
+//     /*
+//      * Emergency 模式移動較快速。
+//      */
+//     static constexpr int EmergencyStepDegrees = 12;
+
+
+//     /*
+//      * 一般掃描範圍。
+//      */
+//     static constexpr int LeftMinimum = 165;
+
+//     static constexpr int LeftMaximum = 178;
+
+
+//     static constexpr int MiddleMinimum = 85;
+
+//     static constexpr int MiddleMaximum = 95;
+
+
+//     static constexpr int RightMinimum = 2;
+
+//     static constexpr int RightMaximum = 15;
+
+
+//     /*
+//      * Emergency 固定在兩端之間反覆甩頭。
+//      */
+//     static constexpr int EmergencyLeftAngle = 175;
+
+//     static constexpr int EmergencyRightAngle = 5;
+// };
+
 #pragma once
 
-#include <string>
+#include "ServoMode.h"
+
+#include <atomic>
+#include <thread>
 
 
 class Servo
 {
 public:
+    explicit Servo(
+        int gpio = 18
+    );
 
-    Servo();
+    ~Servo();
+
+
+    Servo(
+        const Servo&
+    ) = delete;
+
+    Servo& operator=(
+        const Servo&
+    ) = delete;
 
 
     void init();
 
 
-    // 立即以平滑方式回到絕對 90°。
+    void setMode(
+        ServoMode mode
+    );
+
+
     void home();
 
 
-    // 開始掃描：
-    // 左側 → 隨機中間 → 右側 → 隨機中間。
     void startScanning();
 
 
-    // 停止掃描。
-    // 目標會被設成絕對 90°，
-    // 之後由 update() 每次移動一小步回去。
     void stopScanning();
 
 
-    // 每個主迴圈呼叫一次。
-    // 每次只移動一小步，不阻塞主程式。
-    void update();
+    void startEmergencyShake();
 
 
-    bool isScanning() const;
+    [[nodiscard]]
+    ServoMode mode() const;
 
 
-    /*
-     * 保留舊介面。
-     * 其他 target 若仍有使用這些函式，
-     * 也可以繼續編譯。
-     */
-    void shakeHead();
-
-    void stopShaking();
-
-    void lookLeft();
-
-    void lookCenter();
-
-    void lookRight();
+    [[nodiscard]]
+    bool isRunning() const;
 
 
 private:
-
     enum class ScanPhase
     {
         Left,
@@ -63,27 +275,36 @@ private:
     };
 
 
-    bool exists(
-        const std::string& path
-    ) const;
+    void controlLoop();
 
 
-    void writeFile(
-        const std::string& path,
-        int value
+    void applyModeTransition(
+        ServoMode previousMode,
+        ServoMode currentMode
     );
 
 
-    void setDutyCycle(
-        int dutyNs
+    void updateHome();
+
+
+    void updateScanning();
+
+
+    void updateEmergency();
+
+
+    void setAngle(
+        int angle
     );
 
 
-    int angleToDuty(
+    [[nodiscard]]
+    int angleToPulseWidth(
         int angle
     ) const;
 
 
+    [[nodiscard]]
     int randomAngle(
         int minimum,
         int maximum
@@ -96,91 +317,58 @@ private:
     void advanceScanPhase();
 
 
-    void moveOneStepTowardTarget();
-
-
-    void moveSmooth(
-        int targetAngle,
-        int delayMs = 20
+    void moveTowardTarget(
+        int stepDegrees
     );
 
 
 private:
+    int gpio_;
+
+    int chipHandle_;
 
     int currentAngle_;
 
     int targetAngle_;
 
-    bool scanning_;
-
     ScanPhase scanPhase_;
 
+    std::atomic<ServoMode> mode_;
 
-    /*
-     * GPIO18 / Physical Pin 12
-     * 對應 pwmchip0/pwm2。
-     */
-    static constexpr int Channel = 2;
+    std::atomic<bool> running_;
 
-
-    /*
-     * Servo PWM period：20 ms = 50 Hz。
-     */
-    static constexpr int PeriodNs = 20000000;
+    std::thread controlThread_;
 
 
-    /*
-     * SG90 較安全的 pulse 範圍。
-     * 不使用 0.5 ms 與 2.5 ms，
-     * 避免撞到機械極限。
-     */
-    static constexpr int MinimumDutyNs = 900000;
-
-    static constexpr int MaximumDutyNs = 2100000;
-
-
-    /*
-     * 開機、待機、人離開時的絕對中心。
-     */
     static constexpr int HomeAngle = 90;
 
+    static constexpr int MinimumPulseWidthUs = 1600;
 
-    /*
-     * 每次 update() 移動的角度。
-     * 你的主迴圈約每 300 ms 呼叫一次。
-     */
-    static constexpr int StepDegrees = 3;
+    static constexpr int CenterPulseWidthUs = 1800;
 
+    static constexpr int MaximumPulseWidthUs = 2000;
 
-    /*
-     * 掃描左側範圍。
-     */
-    static constexpr int LeftMinimum = 50;
+    static constexpr int ServoFrequencyHz = 50;
 
-    static constexpr int LeftMaximum = 70;
+    static constexpr int ControlIntervalMs = 15;
 
+    static constexpr int NormalStepDegrees = 3;
 
-    /*
-     * 掃描過程中的隨機中間範圍。
-     * 這和 HomeAngle = 90 是兩個不同概念。
-     */
-    static constexpr int ScanMiddleMinimum = 75;
+    static constexpr int EmergencyStepDegrees = 12;
 
-    static constexpr int ScanMiddleMaximum = 105;
+    static constexpr int LeftMinimum = 165;
 
+    static constexpr int LeftMaximum = 178;
 
-    /*
-     * 掃描右側範圍。
-     */
-    static constexpr int RightMinimum = 110;
+    static constexpr int MiddleMinimum = 85;
 
-    static constexpr int RightMaximum = 130;
+    static constexpr int MiddleMaximum = 95;
 
+    static constexpr int RightMinimum = 2;
 
-    const std::string PwmChipPath =
-        "/sys/class/pwm/pwmchip0";
+    static constexpr int RightMaximum = 15;
 
+    static constexpr int EmergencyLeftAngle = 175;
 
-    const std::string PwmPath =
-        "/sys/class/pwm/pwmchip0/pwm2";
+    static constexpr int EmergencyRightAngle = 5;
 };

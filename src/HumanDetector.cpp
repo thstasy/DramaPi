@@ -1,29 +1,66 @@
+// #include "HumanDetector.h"
+
+
+// HumanState HumanDetector::detect(
+//     float distance
+// ) const
+// {
+//     if(distance > 100.0f)
+//     {
+//         return HumanState::Alone;
+//     }
+
+//     if(distance > 70.0f)
+//     {
+//         return HumanState::Nearby;
+//     }
+
+//     if(distance > 40.0f)
+//     {
+//         return HumanState::Approaching;
+//     }
+
+//     if(distance > 25.0f)
+//     {
+//         return HumanState::Close;
+//     }
+
+//     if(distance > 15.0f)
+//     {
+//         return HumanState::PersonalSpace;
+//     }
+
+//     return HumanState::Emergency;
+// }
+
 #include "HumanDetector.h"
 
 
-HumanState HumanDetector::detect(float distance) const
+HumanState HumanDetector::detect(
+    float distance
+) const
 {
-    if(distance > 200)
+    if(distance > AloneDistanceCm)
     {
         return HumanState::Alone;
     }
 
-    if(distance > 150)
+    if(distance > NearbyDistanceCm)
     {
         return HumanState::Nearby;
     }
 
-    if(distance > 100)
+    if(distance > ApproachingDistanceCm)
     {
         return HumanState::Approaching;
     }
 
-    if(distance > 50)
+    if(distance > CloseDistanceCm)
     {
         return HumanState::Close;
     }
 
-    if(distance > 30)
+    if(distance > PersonalSpaceDistanceCm)
     {
         return HumanState::PersonalSpace;
     }
