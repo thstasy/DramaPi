@@ -1,50 +1,82 @@
 #pragma once
 
-#include <gpiod.hpp>
-#include <memory>
-
 
 class RGBLed
 {
 public:
+    RGBLed(
+        int redGpio,
+        int greenGpio,
+        int blueGpio
+    );
+
+    ~RGBLed();
+
 
     RGBLed(
-        int redPin,
-        int greenPin,
-        int bluePin
-    );
+        const RGBLed&
+    ) = delete;
+
+    RGBLed& operator=(
+        const RGBLed&
+    ) = delete;
+
+
+    void init();
 
 
     void off();
 
     void red();
+
     void green();
+
     void blue();
 
     void yellow();
+
     void purple();
+
     void cyan();
+
     void white();
 
-    void orange();
 
-
-private:
-
-    int redPin_;
-    int greenPin_;
-    int bluePin_;
-
-
-    gpiod::chip chip_;
-
-    std::shared_ptr<gpiod::line_request> request_;
+    /*
+     * 亮度範圍為 0 到 100。
+     */
+    void setBrightness(
+        int redPercent,
+        int greenPercent,
+        int bluePercent
+    );
 
 
     void set(
-        bool red,
-        bool green,
-        bool blue
+        bool redOn,
+        bool greenOn,
+        bool blueOn
     );
 
+
+private:
+    void setChannelBrightness(
+        int gpio,
+        int percent
+    );
+
+
+private:
+    int redGpio_;
+
+    int greenGpio_;
+
+    int blueGpio_;
+
+    int chipHandle_;
+
+    bool initialized_;
+
+
+    static constexpr int PwmFrequencyHz = 500;
 };

@@ -16,23 +16,29 @@ set(
 
     src/main.cpp
 
+    # Hardware
     src/hardware/Buzzer.cpp
+    src/hardware/Button.cpp
     src/hardware/DistanceSensor.cpp
     src/hardware/LCD1602.cpp
     src/hardware/Led.cpp
+    src/hardware/MatrixController.cpp
     src/hardware/PassiveBuzzer.cpp
     src/hardware/RGBLed.cpp
     src/hardware/Servo.cpp
     src/hardware/StatusLights.cpp
 
+    # Drama
     src/drama/DramaEngine.cpp
     src/drama/DramaLibrary.cpp
     src/drama/MoodEngine.cpp
     src/drama/ReminderLibrary.cpp
 
+    # Human interaction
     src/human/HumanDetector.cpp
     src/human/HumanInteraction.cpp
 
+    # System monitoring
     src/system/CommandRunner.cpp
     src/system/CpuMonitor.cpp
     src/system/DiskMonitor.cpp
@@ -70,7 +76,7 @@ target_link_libraries(
 
 
 # ============================
-# Tests
+# LED test
 # ============================
 
 add_executable(
@@ -93,6 +99,10 @@ target_link_libraries(
 )
 
 
+# ============================
+# LCD test
+# ============================
+
 add_executable(
     test_lcd
 
@@ -106,6 +116,10 @@ target_include_directories(
     include
 )
 
+
+# ============================
+# Ultrasonic test
+# ============================
 
 add_executable(
     test_ultrasonic
@@ -128,6 +142,10 @@ target_link_libraries(
 )
 
 
+# ============================
+# Passive buzzer test
+# ============================
+
 add_executable(
     test_passive_buzzer
 
@@ -149,6 +167,10 @@ target_link_libraries(
     lgpio
 )
 
+
+# ============================
+# Mood demo
+# ============================
 
 add_executable(
     demo_mood
@@ -176,7 +198,30 @@ target_link_libraries(
 
 
 # ============================
-# Tools
+# Matrix controls / RGB test
+# ============================
+
+add_executable(
+    test_matrix_controls
+
+    tests/test_matrix_controls.cpp
+)
+
+target_include_directories(
+    test_matrix_controls
+    PRIVATE
+    include
+)
+
+target_link_libraries(
+    test_matrix_controls
+    PRIVATE
+    lgpio
+)
+
+
+# ============================
+# Servo calibration tool
 # ============================
 
 add_executable(

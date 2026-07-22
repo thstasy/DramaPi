@@ -1,142 +1,271 @@
 #include "RGBLed.h"
 
+#include <lgpio.h>
+
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+
 
 RGBLed::RGBLed(
-    int redPin,
-    int greenPin,
-    int bluePin
+    int redGpio,
+    int greenGpio,
+    int blueGpio
 )
 :
-redPin_(redPin),
-greenPin_(greenPin),
-bluePin_(bluePin),
-chip_("/dev/gpiochip0")
+redGpio_(redGpio),
+greenGpio_(greenGpio),
+blueGpio_(blueGpio),
+chipHandle_(-1),
+initialized_(false)
 {
-
-    gpiod::line_settings settings;
-
-    settings.set_direction(
-        gpiod::line::direction::OUTPUT
-    );
+}
 
 
-    request_ =
-        std::make_shared<gpiod::line_request>(
-            chip_
-                .prepare_request()
-                .add_line_settings(
-                    {
-                        redPin_,
-                        greenPin_,
-                        bluePin_
-                    },
-                    settings
-                )
-                .do_request()
-        );
-
+RGBLed::~RGBLed()
+{
+    if(chipHandle_ < 0)
+    {
+        return;
+    }
 
     off();
 
+    lgGpioFree(
+        chipHandle_,
+        redGpio_
+    );
+
+    lgGpioFree(
+        chipHandle_,
+        greenGpio_
+    );
+
+    lgGpioFree(
+        chipHandle_,
+        blueGpio_
+    );
+
+    lgGpiochipClose(
+        chipHandle_
+    );
+
+    chipHandle_ = -1;
 }
 
 
-
-void RGBLed::set(
-    bool red,
-    bool green,
-    bool blue
-)
+void RGBLed::init()
 {
+    if(initialized_)
+    {
+        return;
+    }
 
-    request_->set_value(
-        redPin_,
-        red
-            ? gpiod::line::value::ACTIVE
-            : gpiod::line::value::INACTIVE
-    );
+    chipHandle_ =
+        lgGpiochipOpen(0);
 
+    if(chipHandle_ < 0)
+    {
+        throw std::runtime_error(
+            "Failed to open gpiochip0 for RGB LED"
+        );
+    }
 
-    request_->set_value(
-        greenPin_,
-        green
-            ? gpiod::line::value::ACTIVE
-            : gpiod::line::value::INACTIVE
-    );
+    const int redResult =
+        lgGpioClaimOutput(
+            chipHandle_,
+            0,
+            redGpio_,
+            0
+        );
 
+    const int greenResult =
+        lgGpioClaimOutput(
+            chipHandle_,
+            0,
+            greenGpio_,
+            0
+        );
 
-    request_->set_value(
-        bluePin_,
-        blue
-            ? gpiod::line::value::ACTIVE
-            : gpiod::line::value::INACTIVE
-    );
+    const int blueResult =
+        lgGpioClaimOutput(
+            chipHandle_,
+            0,
+            blueGpio_,
+            0
+        );
 
+    if(
+        redResult < 0
+        || greenResult < 0
+        || blueResult < 0
+    )
+    {
+        throw std::runtime_error(
+            "Failed to claim RGB LED GPIOs"
+        );
+    }
+
+    initialized_ =
+        true;
+
+    off();
 }
-
 
 
 void RGBLed::off()
 {
-    set(false,false,false);
+    setBrightness(
+        0,
+        0,
+        0
+    );
 }
-
 
 
 void RGBLed::red()
 {
-    set(true,false,false);
+    setBrightness(
+        100,
+        0,
+        0
+    );
 }
-
 
 
 void RGBLed::green()
 {
-    set(false,true,false);
+    setBrightness(
+        0,
+        100,
+        0
+    );
 }
-
 
 
 void RGBLed::blue()
 {
-    set(false,false,true);
+    setBrightness(
+        0,
+        0,
+        100
+    );
 }
-
 
 
 void RGBLed::yellow()
 {
-    // red + green
-    set(true,true,false);
+    setBrightness(
+        100,
+        100,
+        0
+    );
 }
-
 
 
 void RGBLed::purple()
 {
-    // red + blue
-    set(true,false,true);
+    setBrightness(
+        100,
+        0,
+        100
+    );
 }
-
 
 
 void RGBLed::cyan()
 {
-    // green + blue
-    set(false,true,true);
+    setBrightness(
+        0,
+        100,
+        100
+    );
 }
-
 
 
 void RGBLed::white()
 {
-    set(true,true,true);
+    setBrightness(
+        100,
+        100,
+        100
+    );
 }
 
 
-
-void RGBLed::orange()
+void RGBLed::setBrightness(
+    int redPercent,
+    int greenPercent,
+    int bluePercent
+)
 {
-    // red + green
-    set(true,true,false);
+    if(!initialized_)
+    {
+        return;
+    }
+
+    setChannelBrightness(
+        redGpio_,
+        redPercent
+    );
+
+    setChannelBrightness(
+        greenGpio_,
+        greenPercent
+    );
+
+    setChannelBrightness(
+        blueGpio_,
+        bluePercent
+    );
+}
+
+
+void RGBLed::set(
+    bool redOn,
+    bool greenOn,
+    bool blueOn
+)
+{
+    setBrightness(
+        redOn ? 100 : 0,
+        greenOn ? 100 : 0,
+        blueOn ? 100 : 0
+    );
+}
+
+
+void RGBLed::setChannelBrightness(
+    int gpio,
+    int percent
+)
+{
+    percent =
+        std::clamp(
+            percent,
+            0,
+            100
+        );
+
+    const int result =
+        lgTxPwm(
+            chipHandle_,
+            gpio,
+            PwmFrequencyHz,
+            static_cast<float>(
+                percent
+            ),
+            0,
+            0
+        );
+
+    if(result < 0)
+    {
+        throw std::runtime_error(
+            "lgTxPwm failed on RGB GPIO "
+            + std::to_string(gpio)
+            + ": "
+            + std::to_string(result)
+        );
+    }
 }
