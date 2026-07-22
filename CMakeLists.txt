@@ -1,192 +1,3 @@
-# cmake_minimum_required(VERSION 3.16)
-
-# project(DramaPi)
-
-# set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# include_directories(include)
-
-# find_package(
-#     Threads
-#     REQUIRED
-# )
-
-
-# # ============================
-# # Main DramaPi application
-# # ============================
-
-# add_executable(
-#     drama-pi
-
-#     src/main.cpp
-
-#     src/CommandRunner.cpp
-
-#     src/TemperatureMonitor.cpp
-#     src/CpuMonitor.cpp
-#     src/MemoryMonitor.cpp
-#     src/DiskMonitor.cpp
-#     src/UptimeMonitor.cpp
-
-#     src/DramaEngine.cpp
-#     src/DramaLibrary.cpp
-#     src/ReminderLibrary.cpp
-#     src/MoodEngine.cpp
-
-#     src/EventDetector.cpp
-
-#     # Sensors
-#     src/DistanceSensor.cpp
-
-#     # Hardware reactions
-#     src/LCD1602.cpp
-#     src/Led.cpp
-#     src/Servo.cpp
-#     src/PassiveBuzzer.cpp
-
-#     src/HumanDetector.cpp
-#     src/HumanInteraction.cpp
-#     src/RGBLed.cpp
-#     src/Buzzer.cpp
-# )
-
-# target_link_libraries(
-#     drama-pi
-
-#     gpiodcxx
-#     gpiod
-#     lgpio
-#     Threads::Threads
-# )
-
-
-# # ============================
-# # LED test
-# # ============================
-
-# add_executable(
-#     led-blink
-
-#     src/led_blink.cpp
-# )
-
-# target_link_libraries(
-#     led-blink
-
-#     gpiodcxx
-#     gpiod
-# )
-
-
-# # ============================
-# # LCD test
-# # ============================
-
-# add_executable(
-#     lcd-test
-
-#     src/lcd_test.cpp
-#     src/LCD1602.cpp
-# )
-
-
-# # ============================
-# # Mood randomizer
-# # ============================
-
-# add_executable(
-#     mood-randomizer
-
-#     src/mood_randomizer.cpp
-#     src/Led.cpp
-#     src/LCD1602.cpp
-#     src/Servo.cpp
-# )
-
-# target_link_libraries(
-#     mood-randomizer
-
-#     gpiodcxx
-#     gpiod
-#     lgpio
-#     Threads::Threads
-# )
-
-
-# # ============================
-# # Ultrasonic test
-# # ============================
-
-# add_executable(
-#     ultrasonic-test
-
-#     src/ultrasonic_test.cpp
-#     src/DistanceSensor.cpp
-# )
-
-# target_link_libraries(
-#     ultrasonic-test
-
-#     gpiodcxx
-#     gpiod
-# )
-
-
-# # ============================
-# # Passive buzzer test
-# # ============================
-
-# add_executable(
-#     passive-buzzer-test
-
-#     src/passive_buzzer_test.cpp
-#     src/PassiveBuzzer.cpp
-# )
-
-# target_link_libraries(
-#     passive-buzzer-test
-
-#     gpiodcxx
-#     gpiod
-#     lgpio
-# )
-
-
-# # ============================
-# # lgpio buzzer test
-# # ============================
-
-# add_executable(
-#     lgpio-buzzer-test
-
-#     src/lgpio_buzzer_test.cpp
-# )
-
-# target_link_libraries(
-#     lgpio-buzzer-test
-
-#     lgpio
-# )
-
-
-# # ============================
-# # Servo calibration
-# # ============================
-
-# add_executable(
-#     servo-calibration
-
-#     src/servo_calibration.cpp
-# )
-
-# target_link_libraries(
-#     servo-calibration
-
-#     lgpio
-# )
-
 cmake_minimum_required(VERSION 3.16)
 
 project(DramaPi)
@@ -194,55 +5,63 @@ project(DramaPi)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
-
 find_package(
     Threads
     REQUIRED
 )
 
 
-# ============================
-# Main DramaPi application
-# ============================
-
-add_executable(
-    drama-pi
+set(
+    DRAMAPI_SOURCES
 
     src/main.cpp
 
-    src/CommandRunner.cpp
+    src/hardware/Buzzer.cpp
+    src/hardware/DistanceSensor.cpp
+    src/hardware/LCD1602.cpp
+    src/hardware/Led.cpp
+    src/hardware/PassiveBuzzer.cpp
+    src/hardware/RGBLed.cpp
+    src/hardware/Servo.cpp
+    src/hardware/StatusLights.cpp
 
-    src/TemperatureMonitor.cpp
-    src/CpuMonitor.cpp
-    src/MemoryMonitor.cpp
-    src/DiskMonitor.cpp
-    src/UptimeMonitor.cpp
+    src/drama/DramaEngine.cpp
+    src/drama/DramaLibrary.cpp
+    src/drama/MoodEngine.cpp
+    src/drama/ReminderLibrary.cpp
 
-    src/DramaEngine.cpp
-    src/DramaLibrary.cpp
-    src/ReminderLibrary.cpp
-    src/MoodEngine.cpp
+    src/human/HumanDetector.cpp
+    src/human/HumanInteraction.cpp
 
-    src/EventDetector.cpp
+    src/system/CommandRunner.cpp
+    src/system/CpuMonitor.cpp
+    src/system/DiskMonitor.cpp
+    src/system/EventDetector.cpp
+    src/system/MemoryMonitor.cpp
+    src/system/TemperatureMonitor.cpp
+    src/system/UptimeMonitor.cpp
+)
 
-    src/DistanceSensor.cpp
 
-    src/LCD1602.cpp
-    src/Led.cpp
-    src/StatusLights.cpp
-    src/Servo.cpp
-    src/PassiveBuzzer.cpp
+# ============================
+# Main application
+# ============================
 
-    src/HumanDetector.cpp
-    src/HumanInteraction.cpp
-    src/RGBLed.cpp
-    src/Buzzer.cpp
+add_executable(
+    drama-pi
+
+    ${DRAMAPI_SOURCES}
+)
+
+target_include_directories(
+    drama-pi
+    PRIVATE
+    include
 )
 
 target_link_libraries(
     drama-pi
-
+    PRIVATE
     gpiodcxx
     gpiod
     lgpio
@@ -251,51 +70,104 @@ target_link_libraries(
 
 
 # ============================
-# LED test
+# Tests
 # ============================
 
 add_executable(
-    led-blink
+    test_led
 
-    src/led_blink.cpp
+    tests/test_led.cpp
+)
+
+target_include_directories(
+    test_led
+    PRIVATE
+    include
 )
 
 target_link_libraries(
-    led-blink
-
+    test_led
+    PRIVATE
     gpiodcxx
     gpiod
 )
 
 
-# ============================
-# LCD test
-# ============================
-
 add_executable(
-    lcd-test
+    test_lcd
 
-    src/lcd_test.cpp
-    src/LCD1602.cpp
+    tests/test_lcd.cpp
+    src/hardware/LCD1602.cpp
+)
+
+target_include_directories(
+    test_lcd
+    PRIVATE
+    include
 )
 
 
-# ============================
-# Mood randomizer
-# ============================
-
 add_executable(
-    mood-randomizer
+    test_ultrasonic
 
-    src/mood_randomizer.cpp
-    src/Led.cpp
-    src/LCD1602.cpp
-    src/Servo.cpp
+    tests/test_ultrasonic.cpp
+    src/hardware/DistanceSensor.cpp
+)
+
+target_include_directories(
+    test_ultrasonic
+    PRIVATE
+    include
 )
 
 target_link_libraries(
-    mood-randomizer
+    test_ultrasonic
+    PRIVATE
+    gpiodcxx
+    gpiod
+)
 
+
+add_executable(
+    test_passive_buzzer
+
+    tests/test_passive_buzzer.cpp
+    src/hardware/PassiveBuzzer.cpp
+)
+
+target_include_directories(
+    test_passive_buzzer
+    PRIVATE
+    include
+)
+
+target_link_libraries(
+    test_passive_buzzer
+    PRIVATE
+    gpiodcxx
+    gpiod
+    lgpio
+)
+
+
+add_executable(
+    demo_mood
+
+    tests/demo_mood.cpp
+    src/hardware/Led.cpp
+    src/hardware/LCD1602.cpp
+    src/hardware/Servo.cpp
+)
+
+target_include_directories(
+    demo_mood
+    PRIVATE
+    include
+)
+
+target_link_libraries(
+    demo_mood
+    PRIVATE
     gpiodcxx
     gpiod
     lgpio
@@ -304,73 +176,17 @@ target_link_libraries(
 
 
 # ============================
-# Ultrasonic test
+# Tools
 # ============================
 
 add_executable(
-    ultrasonic-test
+    calibrate_servo
 
-    src/ultrasonic_test.cpp
-    src/DistanceSensor.cpp
+    tools/calibrate_servo.cpp
 )
 
 target_link_libraries(
-    ultrasonic-test
-
-    gpiodcxx
-    gpiod
-)
-
-
-# ============================
-# Passive buzzer test
-# ============================
-
-add_executable(
-    passive-buzzer-test
-
-    src/passive_buzzer_test.cpp
-    src/PassiveBuzzer.cpp
-)
-
-target_link_libraries(
-    passive-buzzer-test
-
-    gpiodcxx
-    gpiod
-    lgpio
-)
-
-
-# ============================
-# lgpio buzzer test
-# ============================
-
-add_executable(
-    lgpio-buzzer-test
-
-    src/lgpio_buzzer_test.cpp
-)
-
-target_link_libraries(
-    lgpio-buzzer-test
-
-    lgpio
-)
-
-
-# ============================
-# Servo calibration
-# ============================
-
-add_executable(
-    servo-calibration
-
-    src/servo_calibration.cpp
-)
-
-target_link_libraries(
-    servo-calibration
-
+    calibrate_servo
+    PRIVATE
     lgpio
 )
